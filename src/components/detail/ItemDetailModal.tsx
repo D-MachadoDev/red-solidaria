@@ -36,7 +36,7 @@ export const ItemDetailModal: React.FC = () => {
         <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-[#E6E1DA]">
           <div className="flex items-center gap-2">
             <Badge variant={isDonation ? 'terracotta' : 'emerald'}>
-              {isDonation ? 'Donación' : 'Solicitud'}
+              {isDonation ? 'Objeto regalado' : 'Necesidad solicitada'}
             </Badge>
             {activeItem.urgent && <Badge variant="amber">Urgente</Badge>}
           </div>
@@ -184,7 +184,7 @@ export const ItemDetailModal: React.FC = () => {
               className="flex-1 bg-[#C4623A] hover:bg-[#AB512C] text-white py-3 px-6 rounded-2xl font-bold text-sm shadow-md transition active-press text-center flex items-center justify-center gap-2"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Contactar por el chat</span>
+              <span>Quiero este objeto (Abrir chat)</span>
             </button>
           ) : (
             <button
@@ -192,7 +192,7 @@ export const ItemDetailModal: React.FC = () => {
               className="flex-1 bg-[#2D6A4F] hover:bg-[#23533E] text-white py-3 px-6 rounded-2xl font-bold text-sm shadow-md transition active-press text-center flex items-center justify-center gap-2"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Ofrecer ayuda</span>
+              <span>Quiero donar esto (Abrir chat)</span>
             </button>
           )}
         </div>

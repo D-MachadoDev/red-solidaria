@@ -34,7 +34,7 @@ export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           <Badge variant="terracotta">{item.category}</Badge>
           {item.urgent && <Badge variant="amber">Urgente</Badge>}
-          {item.isLocal && <Badge variant="emerald">En este dispositivo</Badge>}
+          {item.isLocal && <Badge variant="emerald">Publicado por ti</Badge>}
         </div>
 
         {/* Favorite Bookmark Button */}
@@ -57,7 +57,7 @@ export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
             className={`p-2 rounded-full glass-panel shadow-sm transition active-press ${
               isSaved ? 'bg-white text-red-600' : 'text-gray-700 hover:text-red-600'
             }`}
-            aria-label="Guardar donación"
+            aria-label="Guardar objeto"
           >
             <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-600' : ''}`} />
           </button>
@@ -111,10 +111,10 @@ export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
             <ConditionBadge condition={item.condition} />
             <button
               onClick={() => claimItem(item)}
-              aria-label={`Pedir objeto ${item.title}`}
-              className="bg-[#C4623A] hover:bg-[#AB512C] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C4623A]"
+              aria-label={`Solicitar objeto ${item.title}`}
+              className="bg-[#C4623A] hover:bg-[#AB512C] text-white text-xs font-bold px-3.5 py-1.5 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C4623A]"
             >
-              Pedir
+              Quiero este objeto
             </button>
           </div>
         </div>

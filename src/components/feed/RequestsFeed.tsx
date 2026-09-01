@@ -36,20 +36,20 @@ export const RequestsFeed: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-gradient-to-r from-[#E8F5E9] to-[#F7F4EF] p-6 rounded-3xl border border-[#C8E6C9]">
         <div>
           <span className="text-xs uppercase font-bold text-[#2D6A4F] tracking-wider">
-            Solicitudes de ayuda (Pedir)
+            Necesidades comunitarias y emergencias
           </span>
           <h1 className="font-serif-warm text-2xl md:text-3xl font-bold text-[#1C1814] mt-1">
-            Necesidades concretas y emergencias
+            Cosas que tus vecinos o albergues necesitan recibir
           </h1>
           <p className="text-xs md:text-sm text-[#756D65] mt-1 max-w-2xl">
-            Peticiones directas de personas y grupos comunitarios que requieren insumos o apoyo urgente.
+            Aquí ves las peticiones de ayuda de personas y grupos. Si tienes lo que piden, presiona "Quiero donar esto" para ayudarles.
           </p>
         </div>
         <button
           onClick={() => openCreateModal('request')}
           className="bg-[#2D6A4F] hover:bg-[#23533E] text-white px-5 py-3 rounded-2xl font-bold text-xs md:text-sm shadow-md transition active-press whitespace-nowrap self-start md:self-auto"
         >
-          Pedir ayuda
+          Publicar algo que necesito
         </button>
       </div>
 
@@ -102,7 +102,7 @@ export const RequestsFeed: React.FC = () => {
         <div className="bg-white border border-[#E6E1DA] rounded-3xl p-12 text-center my-8 max-w-md mx-auto shadow-soft">
           <h3 className="font-serif-warm text-xl font-bold text-[#1C1814]">No hay solicitudes registradas con estos filtros</h3>
           <p className="text-xs text-[#756D65] mt-2 leading-relaxed">
-            Si necesitas apoyo o representas a un grupo comunitarios, puedes publicar tu necesidad ahora.
+            Si necesitas apoyo o representas a un grupo comunitario, puedes publicar lo que necesitas ahora.
           </p>
           <div className="flex justify-center gap-3 mt-6">
             <button
@@ -114,11 +114,11 @@ export const RequestsFeed: React.FC = () => {
               }}
               className="bg-[#F0EBE3] hover:bg-[#E6E1DA] text-[#1C1814] text-xs font-semibold px-4 py-2 rounded-full transition"
             >
-              Ver todas las solicitudes
+              Ver todas las necesidades
             </button>
             <button
               onClick={() => openCreateModal('request')}
-              className="bg-[#2D6A4F] text-white text-xs font-semibold px-4 py-2 rounded-full transition"
+              className="bg-[#2D6A4F] text-[#FFFFFF] text-xs font-semibold px-4 py-2 rounded-full transition"
             >
               Publicar necesidad
             </button>

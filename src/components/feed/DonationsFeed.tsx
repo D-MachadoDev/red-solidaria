@@ -36,20 +36,20 @@ export const DonationsFeed: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-gradient-to-r from-[#FEE9E1] to-[#F7F4EF] p-6 rounded-3xl border border-[#FCD5C7]">
         <div>
           <span className="text-xs uppercase font-bold text-[#C4623A] tracking-wider">
-            Publicaciones de objetos (Donar)
+            Objetos disponibles para recibir
           </span>
           <h1 className="font-serif-warm text-2xl md:text-3xl font-bold text-[#1C1814] mt-1">
-            Objetos compartidos por la comunidad
+            Cosas que tus vecinos están regalando
           </h1>
           <p className="text-xs md:text-sm text-[#756D65] mt-1 max-w-2xl">
-            Encuentra ropa, herramientas, alimentos y enseres que otras personas ya no usan y ofrecen de forma gratuita.
+            Aquí ves lo que otras personas están donando gratis. Si te sirve algo, presiona "Quiero este objeto" para pedirlo directamente.
           </p>
         </div>
         <button
           onClick={() => openCreateModal('donation')}
           className="bg-[#C4623A] hover:bg-[#AB512C] text-white px-5 py-3 rounded-2xl font-bold text-xs md:text-sm shadow-md transition active-press whitespace-nowrap self-start md:self-auto"
         >
-          Publicar un objeto
+          Publicar algo que quiero regalar
         </button>
       </div>
 
@@ -86,7 +86,7 @@ export const DonationsFeed: React.FC = () => {
 
       {simulatedState === 'error' && (
         <div className="bg-red-50 border border-red-200 rounded-3xl p-12 text-center my-8 max-w-lg mx-auto">
-          <h3 className="font-bold text-red-900 text-lg">No pudimos cargar las donaciones</h3>
+          <h3 className="font-bold text-red-900 text-lg">No pudimos cargar los objetos en donación</h3>
           <p className="text-xs text-red-700 mt-2 leading-relaxed">
             Ocurrió un problema de conexión. Revisa tu internet e intenta de nuevo.
           </p>
@@ -101,9 +101,9 @@ export const DonationsFeed: React.FC = () => {
 
       {(simulatedState === 'empty' || (simulatedState === 'normal' && filtered.length === 0)) && (
         <div className="bg-white border border-[#E6E1DA] rounded-3xl p-12 text-center my-8 max-w-md mx-auto shadow-soft">
-          <h3 className="font-serif-warm text-xl font-bold text-[#1C1814]">Aún no hay donaciones cerca de ti</h3>
+          <h3 className="font-serif-warm text-xl font-bold text-[#1C1814]">No hay objetos disponibles en esta categoría</h3>
           <p className="text-xs text-[#756D65] mt-2 leading-relaxed">
-            No encontramos resultados para estos filtros. Intenta cambiar de categoría o sé la primera persona en compartir algo.
+            Intenta cambiar de categoría o publicar el primer objeto que desees regalar.
           </p>
           <div className="flex justify-center gap-3 mt-6">
             <button
@@ -115,13 +115,13 @@ export const DonationsFeed: React.FC = () => {
               }}
               className="bg-[#F0EBE3] hover:bg-[#E6E1DA] text-[#1C1814] text-xs font-semibold px-4 py-2 rounded-full transition"
             >
-              Ver todas
+              Ver todos los objetos
             </button>
             <button
               onClick={() => openCreateModal('donation')}
               className="bg-[#C4623A] text-white text-xs font-semibold px-4 py-2 rounded-full transition"
             >
-              Publicar objeto
+              Regalar un objeto
             </button>
           </div>
         </div>

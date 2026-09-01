@@ -36,9 +36,9 @@ export const RequestCard: React.FC<RequestCardProps> = ({ item }) => {
         />
 
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-          <Badge variant="emerald">Solicitud</Badge>
+          <Badge variant="emerald">Necesidad</Badge>
           {item.emergencyTag && <Badge variant="amber">{item.emergencyTag}</Badge>}
-          {item.isLocal && <Badge variant="emerald">En este dispositivo</Badge>}
+          {item.isLocal && <Badge variant="emerald">Publicado por ti</Badge>}
         </div>
 
         <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
@@ -126,10 +126,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({ item }) => {
 
           <button
             onClick={() => fulfillRequest(item)}
-            aria-label={`Ofrecer ayuda para ${item.title}`}
-            className="bg-[#2D6A4F] hover:bg-[#23533E] text-white text-xs font-semibold px-4 py-2 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
+            aria-label={`Donar para ${item.title}`}
+            className="bg-[#2D6A4F] hover:bg-[#23533E] text-white text-xs font-bold px-4 py-2 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
           >
-            Ofrecer ayuda
+            Quiero donar esto
           </button>
         </div>
       </div>
