@@ -29,7 +29,7 @@ const AppContent: React.FC = () => {
       <Header />
 
       {/* Main Content View Switcher */}
-      <main className="flex-1">
+      <main className="flex-1 pb-28 md:pb-0">
         {currentView === 'landing' && <LandingView />}
         {currentView === 'donations' && <DonationsFeed />}
         {currentView === 'requests' && <RequestsFeed />}

@@ -20,9 +20,28 @@ export type CategoryType =
   | 'Juguetes'
   | 'Mascotas'
   | 'Herramientas'
-  | 'Educación';
+  | 'Educación'
+  | 'Hogar'
+  | 'Medicamentos'
+  | 'Emergencias';
 
 export type ItemCondition = 'Nuevo / Sin Usar' | 'Como Nuevo' | 'Buen Estado' | 'Usado Aceptable';
+
+export type EmergencyStatus = 'urgente' | 'en_proceso' | 'parcialmente_cubierta' | 'cubierta';
+
+export interface EmergencyCardData {
+  id: string;
+  type: string;
+  location: string;
+  exactNeeds: string;
+  urgencyLevel: 'Alta Urgencia' | 'Urgencia Media' | 'Baja Urgencia';
+  timeRemaining: string;
+  status: EmergencyStatus;
+  statusText: string;
+  category: 'Alimentos' | 'Ropa' | 'Medicamentos' | 'Hogar' | 'Emergencias';
+  description: string;
+  linkedPublication: ItemPublication;
+}
 
 export interface UserProfile {
   id: string;
@@ -55,6 +74,7 @@ export interface ItemPublication {
   urgent: boolean;
   emergencyTag?: string;
   status: 'disponible' | 'en_proceso' | 'completado' | 'pausado';
+  isLocal?: boolean;
   user: {
     id: string;
     name: string;
@@ -62,7 +82,6 @@ export interface ItemPublication {
     verified: boolean;
     rating: number;
   };
-  // Specific for requests:
   goalCount?: number;
   currentCount?: number;
   unit?: string;

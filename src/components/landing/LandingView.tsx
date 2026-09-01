@@ -2,10 +2,11 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { DonationCard } from '../feed/DonationCard';
 import { RequestCard } from '../feed/RequestCard';
-import { AlertTriangle, HeartHandshake, ArrowRight, ShieldCheck, CheckCircle2, Download } from 'lucide-react';
+import { EmergencyPanel } from './EmergencyPanel';
+import { AlertTriangle, HeartHandshake, ArrowRight, CheckCircle2, Download } from 'lucide-react';
 
 export const LandingView: React.FC = () => {
-  const { setCurrentView, openCreateModal, donations, requests, installPWA, canInstallPWA } = useApp();
+  const { setCurrentView, donations, requests, installPWA, canInstallPWA, scrollToEmergencies } = useApp();
 
   const previewDonations = donations.slice(0, 3);
   const previewRequests = requests.slice(0, 3);
@@ -22,8 +23,8 @@ export const LandingView: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={() => setCurrentView('requests')}
-            className="bg-white text-red-700 hover:bg-red-100 font-bold px-3.5 py-1 rounded-full text-xs transition whitespace-nowrap"
+            onClick={scrollToEmergencies}
+            className="bg-white text-red-700 hover:bg-red-100 font-bold px-3.5 py-1 rounded-full text-xs transition whitespace-nowrap active-press focus:outline-none focus:ring-2 focus:ring-white"
           >
             Ver emergencias activas
           </button>
@@ -132,6 +133,9 @@ export const LandingView: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Emergency Panel Section */}
+      <EmergencyPanel />
 
       {/* Onboarding Cards Section */}
       <section className="bg-white py-16 border-y border-[#E6E1DA]">

@@ -2,18 +2,26 @@ import React from 'react';
 import { ItemPublication } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Badge, ConditionBadge } from '../common/Badge';
-import { Heart, MapPin, CheckCircle2 } from 'lucide-react';
+import { Heart, MapPin, CheckCircle2, Trash2 } from 'lucide-react';
 
 interface DonationCardProps {
   item: ItemPublication;
 }
 
 export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
-  const { openItemDetail, toggleSaveItem, savedItemIds, claimItem } = useApp();
+  const { openItemDetail, toggleSaveItem, savedItemIds, claimItem, deletePublication, currentUser } = useApp();
   const isSaved = savedItemIds.includes(item.id);
+  const isMine = item.isLocal || item.user.id === currentUser.id;
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('¿Deseas eliminar esta donación de tu dispositivo?')) {
+      deletePublication(item.id);
+    }
+  };
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E6E1DA] overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-300 flex flex-col group">
+    <div className="bg-white rounded-3xl border border-[#E6E1DA] overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-300 flex flex-col group relative">
       {/* Image Header with Badges */}
       <div className="relative aspect-[4/3] bg-[#F0EBE3] overflow-hidden">
         <img
@@ -26,21 +34,34 @@ export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           <Badge variant="terracotta">{item.category}</Badge>
           {item.urgent && <Badge variant="amber">Urgente</Badge>}
+          {item.isLocal && <Badge variant="emerald">En este dispositivo</Badge>}
         </div>
 
         {/* Favorite Bookmark Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleSaveItem(item.id);
-          }}
-          className={`absolute top-3 right-3 p-2 rounded-full glass-panel shadow-sm transition active-press ${
-            isSaved ? 'bg-white text-red-600' : 'text-gray-700 hover:text-red-600'
-          }`}
-          aria-label="Guardar donación"
-        >
-          <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-600' : ''}`} />
-        </button>
+        <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
+          {isMine && (
+            <button
+              onClick={handleDelete}
+              className="p-2 rounded-full bg-white/90 text-red-600 hover:bg-red-50 shadow-sm transition active-press"
+              title="Eliminar donación local"
+              aria-label="Eliminar donación local"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSaveItem(item.id);
+            }}
+            className={`p-2 rounded-full glass-panel shadow-sm transition active-press ${
+              isSaved ? 'bg-white text-red-600' : 'text-gray-700 hover:text-red-600'
+            }`}
+            aria-label="Guardar donación"
+          >
+            <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-600' : ''}`} />
+          </button>
+        </div>
 
         {/* Distance Badge */}
         <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -90,7 +111,8 @@ export const DonationCard: React.FC<DonationCardProps> = ({ item }) => {
             <ConditionBadge condition={item.condition} />
             <button
               onClick={() => claimItem(item)}
-              className="bg-[#C4623A] hover:bg-[#AB512C] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full transition active-press shadow-sm"
+              aria-label={`Pedir objeto ${item.title}`}
+              className="bg-[#C4623A] hover:bg-[#AB512C] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C4623A]"
             >
               Pedir
             </button>

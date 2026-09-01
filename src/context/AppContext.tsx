@@ -9,6 +9,7 @@ import {
   PublicationType,
   CategoryType,
   ItemCondition,
+  EmergencyCardData,
 } from '../types';
 import {
   CURRENT_USER,
@@ -16,6 +17,7 @@ import {
   INITIAL_REQUESTS,
   INITIAL_CHATS,
   INITIAL_NOTIFICATIONS,
+  EMERGENCY_LIST,
 } from '../data/mockData';
 
 interface AppContextType {
@@ -24,11 +26,18 @@ interface AppContextType {
   currentUser: UserProfile;
   donations: ItemPublication[];
   requests: ItemPublication[];
+  emergencies: EmergencyCardData[];
   chats: ChatConversation[];
   notifications: AppNotification[];
   toasts: ToastAlert[];
   savedItemIds: string[];
   
+  // Accessibility state
+  highContrast: boolean;
+  fontSize: 'normal' | 'large' | 'xlarge';
+  toggleHighContrast: () => void;
+  setFontSize: (size: 'normal' | 'large' | 'xlarge') => void;
+
   // Modal states
   activeItem: ItemPublication | null;
   openItemDetail: (item: ItemPublication) => void;
@@ -60,6 +69,9 @@ interface AppContextType {
   canInstallPWA: boolean;
   installPWA: () => void;
 
+  // Navigation helpers
+  scrollToEmergencies: () => void;
+
   // Actions
   addPublication: (pub: {
     type: PublicationType;
@@ -74,6 +86,7 @@ interface AppContextType {
     goalCount?: number;
     unit?: string;
   }) => void;
+  deletePublication: (id: string) => void;
   toggleSaveItem: (itemId: string) => void;
   sendChatMessage: (chatId: string, text: string) => void;
   addToast: (toast: Omit<ToastAlert, 'id'>) => void;
@@ -85,17 +98,58 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const LOCAL_STORAGE_KEY_DONATIONS = 'redsolidaria_donations_v1';
+const LOCAL_STORAGE_KEY_REQUESTS = 'redsolidaria_requests_v1';
+const LOCAL_STORAGE_KEY_ACCESSIBILITY = 'redsolidaria_accessibility_v1';
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentView, setCurrentView] = useState<ViewScreen>('landing');
   const [currentUser, setCurrentUser] = useState<UserProfile>(CURRENT_USER);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
 
-  const [donations, setDonations] = useState<ItemPublication[]>(INITIAL_DONATIONS);
-  const [requests, setRequests] = useState<ItemPublication[]>(INITIAL_REQUESTS);
+  // Initialize donations & requests from localStorage if available
+  const [donations, setDonations] = useState<ItemPublication[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_DONATIONS);
+      return saved ? JSON.parse(saved) : INITIAL_DONATIONS;
+    } catch {
+      return INITIAL_DONATIONS;
+    }
+  });
+
+  const [requests, setRequests] = useState<ItemPublication[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_REQUESTS);
+      return saved ? JSON.parse(saved) : INITIAL_REQUESTS;
+    } catch {
+      return INITIAL_REQUESTS;
+    }
+  });
+
+  const [emergencies] = useState<EmergencyCardData[]>(EMERGENCY_LIST);
   const [chats, setChats] = useState<ChatConversation[]>(INITIAL_CHATS);
   const [notifications, setNotifications] = useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
   const [toasts, setToasts] = useState<ToastAlert[]>([]);
   const [savedItemIds, setSavedItemIds] = useState<string[]>(['don_1']);
+
+  // Accessibility States
+  const [highContrast, setHighContrast] = useState<boolean>(() => {
+    try {
+      const acc = localStorage.getItem(LOCAL_STORAGE_KEY_ACCESSIBILITY);
+      return acc ? JSON.parse(acc).highContrast : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const [fontSize, setFontSizeState] = useState<'normal' | 'large' | 'xlarge'>(() => {
+    try {
+      const acc = localStorage.getItem(LOCAL_STORAGE_KEY_ACCESSIBILITY);
+      return acc ? JSON.parse(acc).fontSize : 'normal';
+    } catch {
+      return 'normal';
+    }
+  });
 
   // Modals & Panels
   const [activeItem, setActiveItem] = useState<ItemPublication | null>(null);
@@ -109,6 +163,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [canInstallPWA, setCanInstallPWA] = useState<boolean>(false);
+
+  // Sync to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY_DONATIONS, JSON.stringify(donations));
+    } catch (e) {
+      console.warn('Error al guardar donaciones en localStorage', e);
+    }
+  }, [donations]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY_REQUESTS, JSON.stringify(requests));
+    } catch (e) {
+      console.warn('Error al guardar solicitudes en localStorage', e);
+    }
+  }, [requests]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY_ACCESSIBILITY,
+        JSON.stringify({ highContrast, fontSize })
+      );
+    } catch (e) {
+      console.warn('Error al guardar accesibilidad', e);
+    }
+
+    // Apply high contrast class on root
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+
+    // Apply font size class
+    document.documentElement.classList.remove('font-size-large', 'font-size-xlarge');
+    if (fontSize === 'large') {
+      document.documentElement.classList.add('font-size-large');
+    } else if (fontSize === 'xlarge') {
+      document.documentElement.classList.add('font-size-xlarge');
+    }
+  }, [highContrast, fontSize]);
+
+  // Global Escape key listener to close active modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (activeItem) closeItemDetail();
+        else if (isCreateModalOpen) closeCreateModal();
+        else if (isAuthModalOpen) closeAuthModal();
+        else if (isNotificationsModalOpen) toggleNotificationsModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeItem, isCreateModalOpen, isAuthModalOpen, isNotificationsModalOpen]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -160,6 +271,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const toggleHighContrast = () => {
+    setHighContrast((prev) => !prev);
+  };
+
+  const setFontSize = (size: 'normal' | 'large' | 'xlarge') => {
+    setFontSizeState(size);
+  };
+
   const openItemDetail = (item: ItemPublication) => {
     setActiveItem(item);
   };
@@ -190,8 +309,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     closeAuthModal();
     addToast({
       type: 'success',
-      title: '¡Bienvenid@ de nuevo!',
-      message: `Sesión iniciada como ${currentUser.name}.`,
+      title: 'Sesión iniciada',
+      message: `Has ingresado como ${currentUser.name}.`,
     });
   };
 
@@ -211,6 +330,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const closeChat = () => {
     setActiveChatId(null);
+  };
+
+  const scrollToEmergencies = () => {
+    if (currentView !== 'landing') {
+      setCurrentView('landing');
+    }
+    setTimeout(() => {
+      const el = document.getElementById('panel-emergencias');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
   };
 
   const startChatWithUser = (item: ItemPublication) => {
@@ -261,15 +392,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (exists) {
         addToast({
           type: 'info',
-          title: 'Removido de Guardados',
-          message: 'El objeto ya no está en tu lista de marcadores.',
+          title: 'Removido de guardados',
+          message: 'El objeto fue eliminado de tus marcadores.',
         });
         return prev.filter((id) => id !== itemId);
       } else {
         addToast({
           type: 'success',
-          title: 'Guardado en Favoritos',
-          message: 'Puedes acceder a este objeto desde tu perfil.',
+          title: 'Objeto guardado',
+          message: 'Tu donación queda registrada en este dispositivo.',
         });
         return [...prev, itemId];
       }
@@ -290,7 +421,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     unit?: string;
   }) => {
     const newPub: ItemPublication = {
-      id: (pubData.type === 'donation' ? 'don_' : 'req_') + Date.now(),
+      id: (pubData.type === 'donation' ? 'don_loc_' : 'req_loc_') + Date.now(),
       type: pubData.type,
       title: pubData.title,
       description: pubData.description,
@@ -298,11 +429,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       condition: pubData.condition,
       images: pubData.images.length > 0 ? pubData.images : ['https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&h=600&fit=crop'],
       locationName: pubData.locationName || currentUser.location,
-      distanceKm: 0.3,
+      distanceKm: 0.2,
       createdAt: 'Hace un momento',
       urgent: pubData.urgent,
       emergencyTag: pubData.emergencyTag,
       status: 'disponible',
+      isLocal: true,
       goalCount: pubData.goalCount || 1,
       currentCount: 0,
       unit: pubData.unit || 'unidades',
@@ -320,21 +452,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser((prev) => ({ ...prev, donationsCount: prev.donationsCount + 1 }));
       addToast({
         type: 'success',
-        title: '¡Donación Publicada!',
-        message: 'Tu objeto ya está visible para la comunidad cercana.',
+        title: 'Donación publicada',
+        message: 'Tu donación queda registrada en este dispositivo.',
       });
       setCurrentView('donations');
     } else {
       setRequests((prev) => [newPub, ...prev]);
       addToast({
         type: 'success',
-        title: '¡Solicitud Creada!',
-        message: 'Tu pedido de ayuda ha sido publicado con éxito.',
+        title: 'Solicitud publicada',
+        message: 'Tu solicitud quedó publicada. Las personas cercanas podrán verla y contactarte.',
       });
       setCurrentView('requests');
     }
 
     closeCreateModal();
+  };
+
+  const deletePublication = (id: string) => {
+    setDonations((prev) => prev.filter((item) => item.id !== id));
+    setRequests((prev) => prev.filter((item) => item.id !== id));
+    if (activeItem?.id === id) {
+      closeItemDetail();
+    }
+    addToast({
+      type: 'info',
+      title: 'Publicación eliminada',
+      message: 'La solicitud fue eliminada de este dispositivo.',
+    });
   };
 
   const sendChatMessage = (chatId: string, text: string) => {
@@ -362,12 +507,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    // Auto-reply response simulation after 2 seconds
     setTimeout(() => {
       const replies = [
-        '¡Perfecto! Quedamos atentos para la entrega.',
-        'Gracias por avisar, ¡nos vemos en el punto acordado!',
-        '¡Genial! Aprecio muchísimo el apoyo comunitaria.',
+        'Entendido, quedamos atentos para coordinar la entrega.',
+        'Muchas gracias por comunicarte. Nos vemos en el punto acordado.',
+        'Excelente, agradezco el apoyo directo.',
       ];
       const randomReply = replies[Math.floor(Math.random() * replies.length)];
 
@@ -411,8 +555,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const next = !prev;
       addToast({
         type: next ? 'warning' : 'success',
-        title: next ? 'Simulador Offline Activado' : 'Conexión Restaurada',
-        message: next ? 'Probando funcionamiento sin internet' : 'Modo en vivo activado',
+        title: next ? 'Modo sin conexión' : 'Conexión restaurada',
+        message: next ? 'Navegando con copia local' : 'Conectado a la red',
       });
       return next;
     });
@@ -425,8 +569,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (choiceResult.outcome === 'accepted') {
           addToast({
             type: 'success',
-            title: '¡RedSolidaria Instalada!',
-            message: 'La aplicación ahora está disponible en tu pantalla de inicio.',
+            title: 'Aplicación instalada',
+            message: 'RedSolidaria ahora está disponible en tu pantalla de inicio.',
           });
         }
         setDeferredPrompt(null);
@@ -436,7 +580,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addToast({
         type: 'info',
         title: 'Instalación PWA',
-        message: 'Para instalar, presiona "Añadir a la pantalla de inicio" en el menú de tu navegador.',
+        message: 'Presiona "Añadir a pantalla de inicio" desde el menú de tu navegador.',
       });
     }
   };
@@ -448,11 +592,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     startChatWithUser(item);
     closeItemDetail();
-    addToast({
-      type: 'success',
-      title: '¡Solicitud de contacto enviada!',
-      message: `Has contactado a ${item.user.name} para acordar la entrega de "${item.title}".`,
-    });
   };
 
   const fulfillRequest = (item: ItemPublication) => {
@@ -462,11 +601,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     startChatWithUser(item);
     closeItemDetail();
-    addToast({
-      type: 'success',
-      title: '¡Gracias por ayudar!',
-      message: `Has respondido a la solicitud de ${item.user.name}.`,
-    });
   };
 
   return (
@@ -477,10 +611,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         donations,
         requests,
+        emergencies,
         chats,
         notifications,
         toasts,
         savedItemIds,
+        highContrast,
+        fontSize,
+        toggleHighContrast,
+        setFontSize,
         activeItem,
         openItemDetail,
         closeItemDetail,
@@ -504,7 +643,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleOfflineMode,
         canInstallPWA,
         installPWA,
+        scrollToEmergencies,
         addPublication,
+        deletePublication,
         toggleSaveItem,
         sendChatMessage,
         addToast,

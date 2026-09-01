@@ -2,22 +2,30 @@ import React from 'react';
 import { ItemPublication } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Badge } from '../common/Badge';
-import { Heart, MapPin } from 'lucide-react';
+import { Heart, MapPin, Trash2 } from 'lucide-react';
 
 interface RequestCardProps {
   item: ItemPublication;
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({ item }) => {
-  const { openItemDetail, fulfillRequest, toggleSaveItem, savedItemIds } = useApp();
+  const { openItemDetail, fulfillRequest, toggleSaveItem, savedItemIds, deletePublication, currentUser } = useApp();
   const isSaved = savedItemIds.includes(item.id);
+  const isMine = item.isLocal || item.user.id === currentUser.id;
 
   const goal = item.goalCount || 1;
   const current = item.currentCount || 0;
   const progressPercent = Math.min(100, Math.round((current / goal) * 100));
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('¿Deseas eliminar esta solicitud de tu dispositivo?')) {
+      deletePublication(item.id);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-3xl border border-[#2D6A4F]/20 overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-300 flex flex-col group">
+    <div className="bg-white rounded-3xl border border-[#2D6A4F]/20 overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-300 flex flex-col group relative">
       {/* Header Banner */}
       <div className="relative aspect-[16/9] bg-[#E8F5E9] overflow-hidden">
         <img
@@ -30,20 +38,33 @@ export const RequestCard: React.FC<RequestCardProps> = ({ item }) => {
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           <Badge variant="emerald">Solicitud</Badge>
           {item.emergencyTag && <Badge variant="amber">{item.emergencyTag}</Badge>}
+          {item.isLocal && <Badge variant="emerald">En este dispositivo</Badge>}
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleSaveItem(item.id);
-          }}
-          className={`absolute top-3 right-3 p-2 rounded-full glass-panel shadow-sm transition active-press ${
-            isSaved ? 'bg-white text-red-600' : 'text-gray-700 hover:text-red-600'
-          }`}
-          aria-label="Guardar solicitud"
-        >
-          <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-600' : ''}`} />
-        </button>
+        <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
+          {isMine && (
+            <button
+              onClick={handleDelete}
+              className="p-2 rounded-full bg-white/90 text-red-600 hover:bg-red-50 shadow-sm transition active-press"
+              title="Eliminar solicitud local"
+              aria-label="Eliminar solicitud local"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSaveItem(item.id);
+            }}
+            className={`p-2 rounded-full glass-panel shadow-sm transition active-press ${
+              isSaved ? 'bg-white text-red-600' : 'text-gray-700 hover:text-red-600'
+            }`}
+            aria-label="Guardar solicitud"
+          >
+            <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-600' : ''}`} />
+          </button>
+        </div>
 
         <div className="absolute bottom-3 left-3 bg-[#2D6A4F]/90 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
           <MapPin className="w-3 h-3 text-[#52B788]" />
@@ -105,7 +126,8 @@ export const RequestCard: React.FC<RequestCardProps> = ({ item }) => {
 
           <button
             onClick={() => fulfillRequest(item)}
-            className="bg-[#2D6A4F] hover:bg-[#23533E] text-white text-xs font-semibold px-4 py-2 rounded-full transition active-press shadow-sm"
+            aria-label={`Ofrecer ayuda para ${item.title}`}
+            className="bg-[#2D6A4F] hover:bg-[#23533E] text-white text-xs font-semibold px-4 py-2 rounded-full transition active-press shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
           >
             Ofrecer ayuda
           </button>

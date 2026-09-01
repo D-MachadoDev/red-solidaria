@@ -29,6 +29,50 @@
   }
 }
 
+/* Accessibility: Font Size Scaling */
+html.font-size-large {
+  font-size: 112.5%; /* 18px base */
+}
+
+html.font-size-xlarge {
+  font-size: 125%; /* 20px base */
+}
+
+/* Accessibility: High Contrast Mode */
+html.high-contrast body {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast div,
+html.high-contrast header,
+html.high-contrast section,
+html.high-contrast nav,
+html.high-contrast article,
+html.high-contrast button,
+html.high-contrast input,
+html.high-contrast textarea,
+html.high-contrast select {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+}
+
+html.high-contrast a,
+html.high-contrast button {
+  text-decoration: underline;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Custom Utilities for smooth animations and aesthetics */
 .glass-panel {
   background: rgba(255, 255, 255, 0.88);
