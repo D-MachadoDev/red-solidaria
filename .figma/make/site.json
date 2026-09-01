@@ -1,0 +1,10 @@
+{
+  "description": "Connects donors with those in need in Colombia, facilitating the exchange of unused items for essential resources, fostering community support.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
