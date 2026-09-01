@@ -70,7 +70,7 @@ export const Header: React.FC = () => {
                   : 'text-[#6B6258] hover:text-[#1C1814]'
               }`}
             >
-              Donar
+              Objetos Regalados
             </button>
             <button
               onClick={() => setCurrentView('requests')}
@@ -80,7 +80,7 @@ export const Header: React.FC = () => {
                   : 'text-[#6B6258] hover:text-[#1C1814]'
               }`}
             >
-              Pedir Ayuda
+              Necesidades de Ayuda
             </button>
             <button
               onClick={() => setCurrentView('chat')}

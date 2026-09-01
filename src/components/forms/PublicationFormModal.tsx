@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CategoryType, ItemCondition, PublicationType } from '../../types';
 
@@ -37,14 +37,23 @@ export const PublicationFormModal: React.FC = () => {
 
   // Form image URL states
   const [imageUrlInput, setImageUrlInput] = useState('');
-  const [images, setImages] = useState<string[]>([
-    type === 'donation'
-      ? 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&h=600&fit=crop'
-      : 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&h=600&fit=crop',
-  ]);
+  const [images, setImages] = useState<string[]>([]);
 
   // Validation state
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Synchronize modal type whenever modal opens or createModalType changes
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      setType(createModalType);
+      setErrors({});
+      setImages([
+        createModalType === 'donation'
+          ? 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&h=600&fit=crop'
+          : 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&h=600&fit=crop',
+      ]);
+    }
+  }, [isCreateModalOpen, createModalType]);
 
   if (!isCreateModalOpen) return null;
 
@@ -91,7 +100,7 @@ export const PublicationFormModal: React.FC = () => {
         <div className="px-6 py-4 bg-white border-b border-[#E6E1DA] flex items-center justify-between">
           <div>
             <h3 className="font-serif-warm text-xl font-bold text-[#1C1814]">
-              {type === 'donation' ? 'Publicar una donación' : 'Crear solicitud de ayuda'}
+              {type === 'donation' ? 'Regalar un objeto (Donación)' : 'Solicitar ayuda (Necesidad)'}
             </h3>
             <p className="text-xs text-[#756D65]">Llena los datos concretos para conectar con otras personas</p>
           </div>
@@ -114,7 +123,7 @@ export const PublicationFormModal: React.FC = () => {
                 : 'bg-[#F0EBE3] text-[#756D65] hover:bg-gray-200'
             }`}
           >
-            Quiero Donar
+            Quiero Donar (Regalar)
           </button>
           <button
             type="button"
@@ -125,7 +134,7 @@ export const PublicationFormModal: React.FC = () => {
                 : 'bg-[#F0EBE3] text-[#756D65] hover:bg-gray-200'
             }`}
           >
-            Necesito Ayuda
+            Necesito Ayuda (Solicitar)
           </button>
         </div>
 
@@ -254,7 +263,7 @@ export const PublicationFormModal: React.FC = () => {
                 placeholder="Pegar enlace de imagen..."
                 value={imageUrlInput}
                 onChange={(e) => setImageUrlInput(e.target.value)}
-                className="flex-1 px-3 py-2 bg-white border border-[#E6E1DA] rounded-xl text-xs"
+                className="flex-1 px-3 py-2 bg-[#FFFFFF] border border-[#E6E1DA] rounded-xl text-xs"
               />
               <button
                 type="button"
